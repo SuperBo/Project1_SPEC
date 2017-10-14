@@ -16,6 +16,8 @@ benchmark_opts=(
 
 mkdir -p $OUT
 
+echo $OPTIONS > $OUT/config
+
 for i in {0..4}; do
 	b=${benchmark[$i]}
 	opt=${benchmark_opts[$i]}
