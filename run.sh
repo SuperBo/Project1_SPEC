@@ -1,8 +1,9 @@
 #!/bin/bash
 
-gem5=/usr/local/gem5/build/X86/gem5.opt
+GEM5PATH=/usr/local/gem5
+gem5=$GEM5PATH/build/X86/gem5.opt
 OUT=/mnt
-SE=/usr/local/gem5/configs/example/se.py
+SE=$GEM5PATH/configs/example/se.py
 OPTIONS="-I 500000000 --cpu-type=TimingSimpleCPU --caches --l2cache --l1d_size=$3kB --l1i_size=$1kB --l2_size=$5MB --l1d_assoc=$4 --l1i_assoc=$2 --l2_assoc=$6 --cacheline_size=$7"
 
 benchmark=( 401.bzip2 429.mcf 456.hmmer 458.sjeng 470.lbm )
@@ -20,5 +21,17 @@ echo $OPTIONS > $OUT/config
 for i in {0..4}; do
 	b=${benchmark[$i]}
 	opt=${benchmark_opts[$i]}
-	$gem5 -d $OUT/$b $SE -c $b/src/benchmark --options="$opt" $OPTIONS
+	$gem5 -d $OUT/$b $SE -c $b/src/benchmark --options="$opt" $OPTIONS &
 done
+
+for job in `jobs -p`
+do
+    echo $job
+    wait $job || let "FAIL+=1"
+done
+
+if [ "$FAIL" == "0" ]; then
+    echo "SUCCEED"
+else
+    echo "FAIL! ($FAIL)"
+fi
